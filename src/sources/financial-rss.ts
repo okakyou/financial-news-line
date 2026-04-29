@@ -16,8 +16,12 @@ const RSS_FEEDS = [
     url: "https://www3.nhk.or.jp/rss/news/cat6.xml",
   },
   {
-    name: "Reuters日本語",
-    url: "https://feeds.reuters.com/reuters/JPbusinessNews",
+    name: "産経ニュース 経済",
+    url: "https://www.sankei.com/rss/economy.xml",
+  },
+  {
+    name: "朝日新聞 経済",
+    url: "https://www.asahi.com/rss/asahi/money.rdf",
   },
   {
     name: "Yahoo!ニュース 経済",

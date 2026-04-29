@@ -74,20 +74,25 @@ async function fetchFromYahoo(
   return { ...indicator, value, change, changePercent };
 }
 
-// stooq.com CSV: Date,Open,High,Low,Close,Volume — 最新行の Close（index 4）を使う
+// stooq.com 日足CSV: Date,Open,High,Low,Close,Volume — Close は index 4
+// 直近5日分を取得して最新2行から前日比を計算する
 async function fetchFromStooq(
   indicator: (typeof INDICATORS)[number],
 ): Promise<MarketIndicator> {
-  const url = `https://stooq.com/q/l/?s=${indicator.symbol}&f=sd2t2ohlcv&e=csv`;
+  const url = `https://stooq.com/q/d/l/?s=${indicator.symbol}&i=d`;
   const text = await fetch(url, { signal: AbortSignal.timeout(8_000) }).then(
     (r) => r.text(),
   );
 
-  const lines = text.trim().split("\n");
-  // lines[0] = header row, lines[1..] = data rows (newest last)
+  const lines = text.trim().split("\n").filter(Boolean);
+  // lines[0] = header row "Date,Open,High,Low,Close,Volume"
+  // lines[1..] = data rows, oldest first
+  if (lines.length < 2) throw new Error("stooq: no data rows");
+
   const lastRow = lines[lines.length - 1]?.split(",");
   const prevRow = lines.length >= 3 ? lines[lines.length - 2]?.split(",") : undefined;
 
+  // Date=0, Open=1, High=2, Low=3, Close=4, Volume=5
   const close = lastRow ? parseFloat(lastRow[4] ?? "") : NaN;
   if (isNaN(close)) throw new Error("stooq: invalid Close value");
 
