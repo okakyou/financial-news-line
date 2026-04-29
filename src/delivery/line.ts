@@ -175,7 +175,7 @@ function buildMarketRow(indicator: MarketIndicator): FlexBox {
   const changeText =
     indicator.changePercent != null
       ? `${indicator.changePercent >= 0 ? "▲" : "▼"}${Math.abs(indicator.changePercent).toFixed(2)}%`
-      : "";
+      : "—";
 
   const isPositive = (indicator.changePercent ?? 0) >= 0;
   const changeColor = indicator.changePercent == null
