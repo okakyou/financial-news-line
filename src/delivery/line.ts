@@ -354,9 +354,14 @@ async function assertLineOk(res: Response, endpoint: string): Promise<void> {
   if (res.ok) return;
 
   let errorCode: string | undefined;
+  let errorDetails: string | undefined;
   try {
-    const body = (await res.json()) as { message?: string };
+    const body = (await res.json()) as { message?: string; details?: unknown[] };
     errorCode = body.message;
+    if (body.details && body.details.length > 0) {
+      errorDetails = JSON.stringify(body.details);
+      console.error("[LINE] エラー詳細:", errorDetails);
+    }
   } catch {
     // ignore JSON parse failure
   }
@@ -365,7 +370,7 @@ async function assertLineOk(res: Response, endpoint: string): Promise<void> {
     res.status === 401
       ? "LINE_CHANNEL_ACCESS_TOKEN が無効です。LINE Developers コンソールで確認してください。"
       : res.status === 400
-        ? `LINE APIリクエストが不正です（${errorCode ?? "不明"}）。LINE_USER_IDS を確認してください。`
+        ? `LINE APIリクエストが不正です（${errorCode ?? "不明"}）${errorDetails ? " 詳細: " + errorDetails : ""}。`
         : `LINE ${endpoint} 送信に失敗: HTTP ${res.status} ${errorCode ?? ""}`;
 
   throw new UserFacingError(msg);
