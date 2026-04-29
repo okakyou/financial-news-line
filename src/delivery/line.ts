@@ -33,10 +33,12 @@ async function pushMessage(
   messages: LineMessage[],
   token: string,
 ): Promise<void> {
+  const body = JSON.stringify({ to, messages });
+  console.info("[LINE] push payload (先頭500文字):", body.slice(0, 500));
   const res = await fetch(`${LINE_API_BASE}/push`, {
     method: "POST",
     headers: lineHeaders(token),
-    body: JSON.stringify({ to, messages }),
+    body,
   });
   await assertLineOk(res, "push");
 }
@@ -46,10 +48,12 @@ async function multicastMessage(
   messages: LineMessage[],
   token: string,
 ): Promise<void> {
+  const body = JSON.stringify({ to, messages });
+  console.info("[LINE] multicast payload (先頭500文字):", body.slice(0, 500));
   const res = await fetch(`${LINE_API_BASE}/multicast`, {
     method: "POST",
     headers: lineHeaders(token),
-    body: JSON.stringify({ to, messages }),
+    body,
   });
   await assertLineOk(res, "multicast");
 }
