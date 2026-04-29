@@ -247,6 +247,12 @@ function buildNewsItem(
   const impactColor =
     item.impact === "高" ? "#e84040" : item.impact === "中" ? "#f0a500" : "#27ae60";
 
+  // LINE は https:// または http:// で始まる URI のみ受け付ける
+  const validUrl =
+    item.source_url?.startsWith("https://") || item.source_url?.startsWith("http://")
+      ? item.source_url
+      : undefined;
+
   return {
     type: "box",
     layout: "vertical",
@@ -254,8 +260,8 @@ function buildNewsItem(
     paddingAll: "12px",
     backgroundColor: "#f8f9fb",
     cornerRadius: "8px",
-    action: item.source_url
-      ? { type: "uri", label: "記事を開く", uri: item.source_url }
+    action: validUrl
+      ? { type: "uri", label: "記事を開く", uri: validUrl }
       : undefined,
     contents: [
       {
