@@ -1,0 +1,70 @@
+name: Daily Financial News (LINE)
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '7 8 * * *'
+      timezone: "Asia/Tokyo"  # 毎日 08:07 JST
+
+permissions:
+  contents: read
+  pages: write        # GitHub Pages へのデプロイに必要
+  id-token: write     # Pages OIDC 認証に必要
+
+concurrency:
+  group: daily-financial-news
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: mkdir -p dist
+
+      - run: npm run start:financial
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_IDS: ${{ secrets.LINE_USER_IDS }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Notify failure to LINE
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.line.me/v2/bot/message/multicast" \
+            -H "Authorization: Bearer $LINE_CHANNEL_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"to\": $(echo \"$LINE_USER_IDS\" | jq -R '[split(\",\") | .[] | select(. != \"\")]'),
+              \"messages\": [{
+                \"type\": \"text\",
+                \"text\": \"⚠️ 金融ニュース配信でエラーが発生しました。\\nワークフロー: $FAILED_RUN_URL\"
+              }]
+            }"
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_USER_IDS: ${{ secrets.LINE_USER_IDS }}
+          FAILED_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  deploy:
+    needs: run
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

@@ -1,0 +1,29 @@
+{
+  "name": "ai-news",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "start:financial": "tsx src/financial-main.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^1.1.0",
+    "@slack/web-api": "^7.8.0",
+    "rss-parser": "^3.13.0",
+    "twitter-api-v2": "^1.18.2",
+    "zod": "^3.24.2",
+    "zod-to-json-schema": "^3.24.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}
