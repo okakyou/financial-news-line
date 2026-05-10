@@ -11,9 +11,8 @@ export async function postToLine(
   analysis: FinancialAnalysis,
   marketData: MarketIndicator[],
   config: FinancialConfig,
-  pagesUrl?: string,
 ): Promise<void> {
-  const message = buildFlexMessage(analysis, marketData, pagesUrl);
+  const message = buildFlexMessage(analysis, marketData);
   const userIds = config.LINE_USER_IDS;
 
   const firstId = userIds[0];
@@ -63,26 +62,24 @@ async function multicastMessage(
 function buildFlexMessage(
   analysis: FinancialAnalysis,
   marketData: MarketIndicator[],
-  pagesUrl?: string,
 ): LineFlexMessage {
   return {
     type: "flex",
     altText: `本日の金融市場サマリー｜${analysis.market_comment}`,
-    contents: buildBubble(analysis, marketData, pagesUrl),
+    contents: buildBubble(analysis, marketData),
   };
 }
 
 function buildBubble(
   analysis: FinancialAnalysis,
   marketData: MarketIndicator[],
-  pagesUrl?: string,
 ): FlexBubble {
   return {
     type: "bubble",
     size: "giga",
     header: buildHeader(),
     body: buildBody(analysis, marketData),
-    footer: buildFooter(analysis, pagesUrl),
+    footer: buildFooter(analysis),
     styles: {
       header: { backgroundColor: "#1a2744" },
       footer: { backgroundColor: "#f5f7fa" },
@@ -308,20 +305,11 @@ function buildNewsItem(
   };
 }
 
-function buildFooter(analysis: FinancialAnalysis, pagesUrl?: string): FlexBox {
-  const fallbackUrl =
-    analysis.news
-      .map((n) => n.source_url)
-      .find((url): url is string => !!url) ??
-    "https://news.yahoo.co.jp/topics/business";
-
-  const ctaUri = pagesUrl || fallbackUrl;
-
+function buildFooter(analysis: FinancialAnalysis): FlexBox {
   return {
     type: "box",
     layout: "vertical",
     paddingAll: "16px",
-    spacing: "sm",
     contents: [
       {
         type: "text",
@@ -329,17 +317,6 @@ function buildFooter(analysis: FinancialAnalysis, pagesUrl?: string): FlexBox {
         size: "xs",
         color: "#555555",
         wrap: true,
-      },
-      {
-        type: "button",
-        style: "primary",
-        color: "#1a2744",
-        height: "sm",
-        action: {
-          type: "uri",
-          label: `全記事を見る（${analysis.news.length}件）`,
-          uri: ctaUri,
-        },
       },
     ],
   };

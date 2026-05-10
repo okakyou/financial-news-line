@@ -34,12 +34,7 @@ async function main() {
   await generateHtmlReport(analysis, marketData, "dist/report.html");
 
   console.info("[4/4] LINE へ送信中...");
-  await postToLine(
-    analysis,
-    marketData,
-    config,
-    financialSettings.report.pagesUrl || undefined,
-  );
+  await postToLine(analysis, marketData, config);
 
   console.info("すべての処理が完了しました");
 }

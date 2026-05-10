@@ -19,7 +19,7 @@ const INDICATORS: Array<{
   { name: "NYダウ", symbol: "^DJI", unit: "ドル", source: "yahoo" },
   { name: "ドル円", symbol: "USDJPY=X", unit: "円", source: "yahoo" },
   { name: "WTI原油", symbol: "CL=F", unit: "ドル", source: "yahoo" },
-  { name: "日本長期金利", symbol: "10jpyb.b", unit: "%", source: "stooq" },
+  { name: "日本国債10年物利回り", symbol: "10jpy.b", unit: "%", source: "stooq" },
 ];
 
 export async function fetchMarketData(): Promise<MarketIndicator[]> {
